@@ -1,0 +1,30 @@
+{
+  "name": "real_time_production_grade_chat_application_backend",
+  "version": "1.0.0",
+  "description": "real_time_production_grade_chat_application_backend",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdityaRoy101/Real_Time_Production_Grade_Chat_Application_Backend.git"
+  },
+  "author": "Aditya Roy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AdityaRoy101/Real_Time_Production_Grade_Chat_Application_Backend/issues"
+  },
+  "homepage": "https://github.com/AdityaRoy101/Real_Time_Production_Grade_Chat_Application_Backend#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.14.1",
+    "nodemon": "^3.1.10",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "socket.io": "^4.8.1"
+  }
+}
