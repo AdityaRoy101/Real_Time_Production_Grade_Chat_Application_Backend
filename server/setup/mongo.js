@@ -6,15 +6,13 @@ const initMongo = () => {
 			mongoose.connect(process.env.MONGO_URL);
 		} else {
 			const options = {
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
 				socketTimeoutMS: 60000, // Set socket timeout to 60 seconds (for buffering)
 				family: 4 // Use IPv4
 			};
-			mongoose.connect(process.env.MONGO_URL, options);
+			mongoose.connect(process.env.MONGO_URI, options);
 		}
 		mongoose.connection.once('connected', function() {
-			resolve('Mongoose default connection open to ' + process.env.MONGO_URL);
+			resolve('Mongoose default connection open to ' + process.env.MONGO_URI);
 		});
 
 		// If the connection throws an error

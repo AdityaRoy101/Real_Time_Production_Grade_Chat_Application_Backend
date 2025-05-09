@@ -1,72 +1,84 @@
 'use strict';
 import express from 'express';
-// import http from 'http';
-import socketIo from 'socket.io';
+import {Server} from 'socket.io';
+import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import bodyParser from 'body-parser';
-
-
-export const app = express();
-app.use((req, res, next) => {
-	res.header('Access-Control-Max-Age', '86400');
-	next();
-});
-
-var indexRouter = require('../../router/index');
-app.use(bodyParser.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname)));
-app.use(express.static(path.resolve(__dirname, '../../public')));
-// ============================================XXXXXXXXXXXXXXXXX=================================
-
-// Main server file - sets up Express and Socket.IO
-// const express = require('express');
-// const http = require('http');
-// const socketIo = require('socket.io');
-// const cors = require('cors');
-// const dotenv = require('dotenv');
-// const connectDB = require('./config/db');
+import rateLimit from 'express-rate-limit';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import indexRouter from '../../router/index.js';
 
 // Load environment variables
 dotenv.config();
 
-// Import routes
-const userRoutes = require('./routes/users');
-const messageRoutes = require('./routes/messages');
-
-// Initialize Express app
-const app = express();
+export const app = express();
 const server = http.createServer(app);
 
-// Set up Socket.IO with CORS
-const io = socketIo(server, {
+// Initialize Socket.io with the HTTP server
+export const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.ALLOWED_DOMAIN_LIST ? process.env.ALLOWED_DOMAIN_LIST.split(' ') : '*',
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
-// Connect to MongoDB
-connectDB();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/messages', messageRoutes);
-
-// Basic route for testing
-app.get('/', (req, res) => {
-  res.send('Chat API is running');
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (token) {
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
+      if (err) return next(new Error('Authentication error'));
+      socket.decoded = decoded;
+      next();
+    });
+  } else {
+    next(new Error('Authentication error'));
+  }
 });
 
-// Initialize Socket.IO
-require('./socket')(io);
+app.use((req, res, next) => {
+  res.header('Access-Control-Max-Age', '86400');
+  next();
+});
 
-// Start server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.use(express.urlencoded({extended: false}));
+app.use(express.json());
+
+const limiter = rateLimit({
+  windowMs: process.env.RATE_LIMITER_WINDOWMS || 900000,
+  max: process.env.RATE_LIMITER_MAX_REQUEST || 100000,
+  message: process.env.RATE_LIMITER_MESSAGE || "Too many requests, please try again later."
+});
+
+if (process.env.ALLOWED_DOMAIN_LIST) {
+  const allowedDomains = process.env.ALLOWED_DOMAIN_LIST.split(' ');
+  app.use(
+    cors({ origin: allowedDomains })
+  );
+}
+
+app.use(limiter);
+app.use(compression());
+app.use(cookieParser());
+app.use('/api/v1', indexRouter);
+
+// Basic Socket.io setup for chat
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+  
+  socket.on('join_room', (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room ${roomId}`);
+  });
+  
+  socket.on('send_message', (data) => {
+    socket.to(data.room).emit('receive_message', data);
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+export default server;

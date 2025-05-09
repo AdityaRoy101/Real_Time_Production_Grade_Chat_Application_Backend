@@ -1,8 +1,11 @@
-var express = require('express');
-var router = express.Router();
+import express from 'express';
+import authController from '../controller/authController.js';
 
-const authService = require('../controller/auditController');
+const router = express.Router();
 
-router.get('/login', auditController.callingPlatform);
+// Auth Router Functions
+router.post('/login', authController.loginUser);
+router.post('/signup', authController.signupUser);
+router.get('/verify', authController.JwtVerify);
 
-module.exports = router;
+export default router;

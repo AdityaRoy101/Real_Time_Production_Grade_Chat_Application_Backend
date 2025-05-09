@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
+import express from 'express';
+import auth from './authRouter.js';
 
-const auth = require('./authRouter'); // Auth Route
-const clinic = require('./clinics');
-router.use('/auth', audit);
-router.use('/clinic', clinic);
+const router = express.Router();
 
-module.exports = router;
+// User Auth
+router.use('/auth', auth);
+
+export default router;
