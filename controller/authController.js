@@ -15,7 +15,13 @@ const loginUser = async(req, res) => {
         // Creating a JWT Token
         const token = createToken(user._id, user.email, user.name);
 
-        res.cookie('token',token).json({message: `${user.name} logged in successfully`});
+        // Set proper SameSite and Secure attributes for cross-domain cookies
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true, // Always use secure in production
+            sameSite: 'none', // Critical for cross-site requests
+            maxAge: 3 * 24 * 60 * 60 * 1000 // 3 days
+        }).json({message: `${user.name} logged in successfully`});
     } catch (error) {
         res.status(200).json({ error: error.message });
     }
@@ -29,9 +35,15 @@ const signupUser = async(req, res) => {
         const user = await UserSchema.signup(name, email, password);
 
         // Creating a JWT Token
-        const token = createToken(user._id);
+        const token = createToken(user._id, user.email, user.name);
 
-        res.status(201).json({ name, email, token });
+        // Use same cookie settings for consistency
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            maxAge: 3 * 24 * 60 * 60 * 1000
+        }).status(201).json({ name, email, token });
     } catch (error) {
         res.status(200).json({ error: error.message });
     }
