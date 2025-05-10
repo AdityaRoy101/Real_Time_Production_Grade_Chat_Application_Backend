@@ -86,18 +86,18 @@ if (process.env.ALLOWED_DOMAIN_LIST) {
   console.log("Production Cors Detected")
   console.log(`Domains: ${allowedDomains}`)
   // app.use(cors({ origin: '*' }))
-  app.use(cors({
-    origin: '*',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }));
   // app.use(cors({
-  //   origin: allowedDomains,
+  //   origin: '*',
   //   credentials: true,
   //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   //   allowedHeaders: ['Content-Type', 'Authorization']
   // }));
+  app.use(cors({
+    origin: allowedDomains,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 } else {
   console.log("Local Cors Detected")
   app.use(cors({
