@@ -83,6 +83,7 @@ const limiter = rateLimit({
 if (process.env.ALLOWED_DOMAIN_LIST) {
   const allowedDomains = process.env.ALLOWED_DOMAIN_LIST.split(',');
   // app.use(cors({ origin: allowedDomains }));
+  console.log("Production Cors Detected")
   app.use(cors({
     origin: allowedDomains,
     credentials: true,
@@ -90,6 +91,7 @@ if (process.env.ALLOWED_DOMAIN_LIST) {
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
 } else {
+  console.log("Local Cors Detected")
   app.use(cors({
     origin: 'http://localhost:3001',
     credentials: true,
