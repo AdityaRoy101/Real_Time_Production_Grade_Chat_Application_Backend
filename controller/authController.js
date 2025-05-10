@@ -51,6 +51,8 @@ const signupUser = async(req, res) => {
 
 // JWT user
 const JwtVerify = async(req, res) => {
+    // If we reach this point, authentication has already succeeded
+    // and the user object has been attached to the request by the middleware
     try {
         // First try to get token from cookies
         let token = req.cookies.token;
@@ -75,7 +77,12 @@ const JwtVerify = async(req, res) => {
             return res.status(401).json({ error: "User not found" });
         }
         
-        res.status(200).json(user);
+        // Return user data
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email
+        });
     } catch (error) {
         console.error("JWT Verification error:", error);
         res.status(401).json({ error: "Authentication failed" });

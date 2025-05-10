@@ -11,6 +11,7 @@ import cookieParser from 'cookie-parser';
 import indexRouter from '../../router/index.js';
 import UserSchema from '../models/mongo_collections/userModel.js';
 import Conversation from '../models/mongo_collections/conversationModel.js';
+import { socketAuth } from '../middleware/auth.js';
 
 dotenv.config();
 
@@ -25,6 +26,9 @@ export const io = new Server(server, {
   },
   pingTimeout: 60000 // Increased timeout for better performance
 });
+
+// Use the socketAuth middleware for socket connections
+io.use(socketAuth);
 
 // Optimized maps for user tracking
 const onlineUsers = new Map(); // userId -> socketId
