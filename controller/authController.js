@@ -15,7 +15,6 @@ const loginUser = async(req, res) => {
         // Creating a JWT Token
         const token = createToken(user._id, user.email, user.name);
 
-        // Set cookie AND return token in response
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -28,7 +27,7 @@ const loginUser = async(req, res) => {
                 name: user.name,
                 email: user.email
             },
-            token: token // Important: return token in response body
+            token: token
         });
     } catch (error) {
         res.status(200).json({ error: error.message });
@@ -45,7 +44,6 @@ const signupUser = async(req, res) => {
         // Creating a JWT Token
         const token = createToken(user._id, user.email, user.name);
 
-        // Use same cookie settings for consistency
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -71,18 +69,15 @@ const JwtVerify = async(req, res) => {
             }
         }
         
-        // If still no token, check query parameters
         if (!token && req.query.token) {
             token = req.query.token;
         }
         
-        // Check localStorage token in request body (sent by frontend)
         if (!token && req.body && req.body.token) {
             token = req.body.token;
         }
         
         if (!token) {
-            console.log('No token found in: cookies, headers, query, or body');
             return res.status(401).json({ error: "Authentication required" });
         }
         
@@ -94,7 +89,6 @@ const JwtVerify = async(req, res) => {
             return res.status(401).json({ error: "User not found" });
         }
         
-        // Return user data and also set/refresh the cookie if it was missing
         if (!req.cookies?.token) {
             res.cookie('token', token, {
                 httpOnly: true,
@@ -115,7 +109,6 @@ const JwtVerify = async(req, res) => {
     }
 };
 
-// Use ES module export
 export default {
     loginUser,
     signupUser,

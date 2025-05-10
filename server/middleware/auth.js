@@ -3,10 +3,10 @@ import UserSchema from '../models/mongo_collections/userModel.js';
 
 // Authentication middleware
 export const requireAuth = async (req, res, next) => {
-  // Try cookie-based auth first
+  // Trying cookie-based auth first
   const token = req.cookies.token;
   
-  // Then try Bearer token from Authorization header
+  // Then trying Bearer token from Authorization header
   const authHeader = req.headers.authorization;
   const bearerToken = authHeader && authHeader.startsWith('Bearer ') 
     ? authHeader.substring(7) 
@@ -21,14 +21,12 @@ export const requireAuth = async (req, res, next) => {
   try {
     const decoded = jwt.verify(finalToken, process.env.SECRET);
     
-    // Optional: Fetch user from database to ensure they still exist
     const user = await UserSchema.findById(decoded._id).select('_id name email');
     
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
     }
     
-    // Attach user info to request object for use in route handlers
     req.user = user;
     next();
   } catch (err) {

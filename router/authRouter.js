@@ -7,7 +7,5 @@ const router = express.Router();
 router.post('/login', authController.loginUser);
 router.post('/signup', authController.signupUser);
 router.get('/verify', authController.JwtVerify);
-// Add a POST endpoint for verification
-router.post('/verify', authController.JwtVerify);
 
 export default router;

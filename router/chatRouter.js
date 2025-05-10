@@ -4,7 +4,7 @@ import { requireAuth } from '../server/middleware/auth.js';
 
 const router = express.Router();
 
-// Apply the authentication middleware to all chat routes
+// authentication middleware
 router.use(requireAuth);
 
 // Conversation routes

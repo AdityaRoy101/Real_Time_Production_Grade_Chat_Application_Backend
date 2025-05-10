@@ -27,7 +27,6 @@ export const io = new Server(server, {
   pingTimeout: 60000 // Increased timeout for better performance
 });
 
-// Use the socketAuth middleware for socket connections
 io.use(socketAuth);
 
 // Optimized maps for user tracking
@@ -86,16 +85,6 @@ const limiter = rateLimit({
 
 if (process.env.ALLOWED_DOMAIN_LIST) {
   const allowedDomains = process.env.ALLOWED_DOMAIN_LIST.split(',');
-  // app.use(cors({ origin: allowedDomains }));
-  console.log("Production Cors Detected")
-  console.log(`Domains: ${allowedDomains}`)
-  // app.use(cors({ origin: '*' }))
-  // app.use(cors({
-  //   origin: '*',
-  //   credentials: true,
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  //   allowedHeaders: ['Content-Type', 'Authorization']
-  // }));
   app.use(cors({
     origin: allowedDomains,
     credentials: true,
@@ -103,7 +92,6 @@ if (process.env.ALLOWED_DOMAIN_LIST) {
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
 } else {
-  console.log("Local Cors Detected")
   app.use(cors({
     origin: 'http://localhost:3001',
     credentials: true,
@@ -178,7 +166,7 @@ io.on('connection', async (socket) => {
     }
   });
   
-  // Handle typing indicator
+  // Handling typing indicator
   socket.on('typing', (data) => {
     socket.to(`conversation:${data.conversationId}`).emit('user_typing', {
       userId: userId,
@@ -187,7 +175,7 @@ io.on('connection', async (socket) => {
     });
   });
   
-  // Handle stopped typing
+  // Handling stopped typing
   socket.on('stop_typing', (data) => {
     socket.to(`conversation:${data.conversationId}`).emit('user_typing', {
       userId: userId,
@@ -196,7 +184,7 @@ io.on('connection', async (socket) => {
     });
   });
   
-  // Handle messages read
+  // Handling messages read
   socket.on('messages_read', (data) => {
     socket.to(`conversation:${data.conversationId}`).emit('messages_read_update', {
       conversationId: data.conversationId,
@@ -241,7 +229,7 @@ io.on('connection', async (socket) => {
     }
   });
   
-  // Handle disconnection
+  // Handling disconnection
   socket.on('disconnect', async () => {
     await UserSchema.updateOnlineStatus(userId, false);
     

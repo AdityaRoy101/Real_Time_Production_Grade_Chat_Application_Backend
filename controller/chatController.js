@@ -4,7 +4,6 @@ import Conversation from '../server/models/mongo_collections/conversationModel.j
 import UserSchema from '../server/models/mongo_collections/userModel.js';
 
 const chatController = {
-  // Getting or creating a conversation between two users
   getConversation: async (req, res) => {
     try {
       const { userId, otherUserId } = req.params;
@@ -181,7 +180,6 @@ const chatController = {
         return res.status(400).json({ error: "Missing conversationId or userId" });
       }
       
-      // Skip if the conversationId is temporary
       if (conversationId.startsWith('temp-')) {
         return res.status(200).json({
           success: true,
@@ -191,7 +189,6 @@ const chatController = {
         });
       }
       
-      // Validate if conversationId is a valid MongoDB ObjectId
       if (!mongoose.Types.ObjectId.isValid(conversationId)) {
         return res.status(400).json({
           error: "Invalid conversation ID format"
