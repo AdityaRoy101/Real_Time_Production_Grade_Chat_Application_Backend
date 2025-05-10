@@ -15,7 +15,7 @@ const loginUser = async(req, res) => {
         // Creating a JWT Token
         const token = createToken(user._id, user.email, user.name);
 
-        // Set cookie (will work for the first user) AND return token in response
+        // Set cookie AND return token in response
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -28,7 +28,7 @@ const loginUser = async(req, res) => {
                 name: user.name,
                 email: user.email
             },
-            token: token // Return token explicitly
+            token: token // Important: return token in response body
         });
     } catch (error) {
         res.status(200).json({ error: error.message });
