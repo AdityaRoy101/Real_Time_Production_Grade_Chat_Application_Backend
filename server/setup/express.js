@@ -84,6 +84,7 @@ if (process.env.ALLOWED_DOMAIN_LIST) {
   const allowedDomains = process.env.ALLOWED_DOMAIN_LIST.split(',');
   // app.use(cors({ origin: allowedDomains }));
   console.log("Production Cors Detected")
+  console.log(`Domains: ${allowedDomains}`)
   app.use(cors({
     origin: allowedDomains,
     credentials: true,
