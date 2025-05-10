@@ -98,6 +98,18 @@ if (process.env.ALLOWED_DOMAIN_LIST) {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
+  // Add this before your other routes
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  console.log(`Received OPTIONS request from: ${origin}`);
+  
+  // Respond with the appropriate CORS headers
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(200).send();
+});
 } else {
   console.log("Local Cors Detected")
   app.use(cors({
