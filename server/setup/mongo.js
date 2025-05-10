@@ -7,12 +7,14 @@ dotenv.config();
 const connectDB = () => {
 	return new Promise((resolve, reject) => {
 		if (process.env.NODE_ENV === 'production') {
-			mongoose.connect(process.env.MONGO_URL, {
+			console.log(`In production mongo hello: ${process.env.MONGO_URI}`);
+			mongoose.connect(process.env.MONGO_URI, {
 				maxPoolSize: 10,
 				serverSelectionTimeoutMS: 5000,
 				socketTimeoutMS: 45000,
 			});
 		} else {
+			console.log(`In Local mongo hello: ${process.env.MONGO_URI}`);
 			mongoose.connect(process.env.MONGO_URI, {
 				socketTimeoutMS: 60000,
 				family: 4,
