@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
 
+// Load environment variables
+dotenv.config();
+
 const connectDB = () => {
 	return new Promise((resolve, reject) => {
 		if (process.env.NODE_ENV === 'production') {
