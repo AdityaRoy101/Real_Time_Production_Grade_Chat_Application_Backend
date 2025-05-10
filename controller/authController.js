@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import UserSchema from '../server/models/mongo_collections/userModel.js';
 
-const createToken = (_id, email, password, name) => {
-    return jwt.sign({_id, email, password, name}, process.env.SECRET, { expiresIn: '3d' });
+const createToken = (_id, email, name) => {
+    return jwt.sign({_id, email, name}, process.env.SECRET, { expiresIn: '3d' });
 };
 
 // login user
@@ -13,7 +13,7 @@ const loginUser = async(req, res) => {
         const user = await UserSchema.login(email, password);
 
         // Creating a JWT Token
-        const token = createToken(user._id, user.email, user.password, user.name);
+        const token = createToken(user._id, user.email, user.name);
 
         res.cookie('token',token).json({message: `${user.name} logged in successfully`});
     } catch (error) {

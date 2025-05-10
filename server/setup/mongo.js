@@ -1,15 +1,20 @@
 import mongoose from 'mongoose';
 
-const initMongo = () => {
+const connectDB = () => {
 	return new Promise((resolve, reject) => {
 		if (process.env.NODE_ENV === 'production') {
-			mongoose.connect(process.env.MONGO_URL);
+			mongoose.connect(process.env.MONGO_URL, {
+				maxPoolSize: 10,
+				serverSelectionTimeoutMS: 5000,
+				socketTimeoutMS: 45000,
+			});
 		} else {
-			const options = {
-				socketTimeoutMS: 60000, // Set socket timeout to 60 seconds (for buffering)
-				family: 4 // Use IPv4
-			};
-			mongoose.connect(process.env.MONGO_URI, options);
+			mongoose.connect(process.env.MONGO_URI, {
+				socketTimeoutMS: 60000,
+				family: 4,
+				maxPoolSize: 5
+			});
+			console.log('MongoDb Connected');
 		}
 		mongoose.connection.once('connected', function() {
 			resolve('Mongoose default connection open to ' + process.env.MONGO_URI);
@@ -27,4 +32,4 @@ const initMongo = () => {
 	});
 };
 
-export default initMongo;
+export default connectDB;

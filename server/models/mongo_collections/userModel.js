@@ -7,19 +7,36 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        index: true
     },
     password: {
         type: String,
         required: true,
-    }
+    },
+    online: {
+        type: Boolean,
+        default: false
+    },
+    lastActive: {
+        type: Date,
+        default: Date.now
+    },
+    avatar: {
+        type: String,
+        default: ""
+    },
+    friends: [{
+        type: Schema.Types.ObjectId,
+        ref: 'UserSchema'
+    }]
 }, { timestamps: true });
-
 
 // static signup method
 userSchema.statics.signup = async function(name, email, password) {
@@ -34,8 +51,6 @@ userSchema.statics.signup = async function(name, email, password) {
     if(!validator.isStrongPassword(password)){
         throw Error("Password is not strong enough");
     }
-
-    // ========================
 
     const exists = await this.findOne({ email });
 
@@ -73,6 +88,18 @@ userSchema.statics.login = async function(email, password){
     }
 
     return user;
+};
+
+// Added a method to update user's online status
+userSchema.statics.updateOnlineStatus = async function(userId, status) {
+    return this.findByIdAndUpdate(
+        userId,
+        { 
+            online: status, 
+            lastActive: status ? undefined : Date.now() 
+        },
+        { new: true }
+    );
 };
 
 const UserSchema = mongoose.model('UserSchema', userSchema);
