@@ -2,10 +2,12 @@
   "name": "real_time_production_grade_chat_application_backend",
   "version": "1.0.0",
   "description": "real_time_production_grade_chat_application_backend",
-  "main": "index.js",
+  "main": "server/app.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon ./server/app.js"
+    "dev": "nodemon ./server/app.js",
+    "start": "node ./server/app.js",
+    "build": "echo 'No build step required for backend'"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,9 @@
     "url": "https://github.com/AdityaRoy101/Real_Time_Production_Grade_Chat_Application_Backend/issues"
   },
   "homepage": "https://github.com/AdityaRoy101/Real_Time_Production_Grade_Chat_Application_Backend#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "dependencies": {
     "bcrypt": "^5.1.1",
     "body-parser": "^2.2.0",
@@ -28,10 +33,12 @@
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.2",
-    "nodemon": "^3.1.10",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "socket.io": "^4.8.1",
     "validator": "^13.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
