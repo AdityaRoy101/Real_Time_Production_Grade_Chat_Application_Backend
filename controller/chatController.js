@@ -181,6 +181,23 @@ const chatController = {
         return res.status(400).json({ error: "Missing conversationId or userId" });
       }
       
+      // Skip if the conversationId is temporary
+      if (conversationId.startsWith('temp-')) {
+        return res.status(200).json({
+          success: true,
+          updatedCount: 0,
+          updatedMessageIds: [],
+          senderIds: []
+        });
+      }
+      
+      // Validate if conversationId is a valid MongoDB ObjectId
+      if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+        return res.status(400).json({
+          error: "Invalid conversation ID format"
+        });
+      }
+      
       const updateResult = await Message.updateMany(
         { 
           conversationId,
@@ -212,6 +229,7 @@ const chatController = {
         senderIds: uniqueSenderIds
       });
     } catch (error) {
+      console.error("Error in markAsRead:", error);
       res.status(500).json({ error: error.message });
     }
   },

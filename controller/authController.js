@@ -50,16 +50,35 @@ const signupUser = async(req, res) => {
 };
 
 // JWT user
-const JwtVerify = (req, res) => {
-    const {token} = req.cookies;
-
-    if(token){
-        jwt.verify(token, process.env.SECRET, {}, (err,user) => {
-            if(err) throw err;
-            res.json(user);
-        });
-    }else{
-        res.json(null);
+const JwtVerify = async(req, res) => {
+    try {
+        // First try to get token from cookies
+        let token = req.cookies.token;
+        
+        // If no token in cookies, check Authorization header
+        if (!token && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            if (authHeader.startsWith('Bearer ')) {
+                token = authHeader.split(' ')[1];
+            }
+        }
+        
+        if (!token) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        
+        const decoded = jwt.verify(token, process.env.SECRET);
+        
+        const user = await UserSchema.findById(decoded._id).select('_id name email');
+        
+        if (!user) {
+            return res.status(401).json({ error: "User not found" });
+        }
+        
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("JWT Verification error:", error);
+        res.status(401).json({ error: "Authentication failed" });
     }
 };
 
