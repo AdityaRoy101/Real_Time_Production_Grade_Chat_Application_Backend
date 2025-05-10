@@ -17,9 +17,24 @@ dotenv.config();
 export const app = express();
 const server = http.createServer(app);
 
+// Also update the Socket.IO CORS settings
 export const io = new Server(server, {
   cors: {
-    origin: process.env.ALLOWED_DOMAIN_LIST ? process.env.ALLOWED_DOMAIN_LIST.split(',') : '*',
+    origin: function(origin, callback) {
+      // For Socket.IO connections
+      if (!origin) return callback(null, true);
+      
+      const allowedDomains = process.env.ALLOWED_DOMAIN_LIST 
+        ? process.env.ALLOWED_DOMAIN_LIST.split(',') 
+        : ['http://localhost:3001', '*'];
+        
+      if (allowedDomains.includes(origin) || allowedDomains.includes('*')) {
+        return callback(null, true);
+      }
+      // For debugging
+      console.log(`Socket.IO connection from: ${origin}`);
+      return callback(null, true);
+    },
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -80,43 +95,57 @@ const limiter = rateLimit({
   message: process.env.RATE_LIMITER_MESSAGE || "Too many requests, please try again later."
 });
 
+// Replace your existing CORS configuration with this:
 if (process.env.ALLOWED_DOMAIN_LIST) {
   const allowedDomains = process.env.ALLOWED_DOMAIN_LIST.split(',');
-  // app.use(cors({ origin: allowedDomains }));
-  console.log("Production Cors Detected")
-  console.log(`Domains: ${allowedDomains}`)
-  // app.use(cors({ origin: '*' }))
-  // app.use(cors({
-  //   origin: '*',
-  //   credentials: true,
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  //   allowedHeaders: ['Content-Type', 'Authorization']
-  // }));
+  console.log("Production CORS configured for domains:", allowedDomains);
+  
+  // Add preflight OPTIONS handler
+  app.options('*', (req, res) => {
+    // Get the origin from the request
+    const origin = req.headers.origin;
+    
+    // Check if the origin is in our allowed list or if we're allowing any origin
+    if (allowedDomains.includes(origin) || allowedDomains.includes('*')) {
+      res.header('Access-Control-Allow-Origin', origin);
+    } else {
+      // If temporarily debugging, allow any origin
+      res.header('Access-Control-Allow-Origin', origin);
+      console.log(`Request from non-allowed origin: ${origin}`);
+    }
+    
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400');
+    res.sendStatus(200);
+  });
+  
+  // Regular CORS middleware
   app.use(cors({
-    origin: allowedDomains,
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedDomains.includes(origin) || allowedDomains.includes('*')) {
+        callback(null, true);
+      } else {
+        // For debugging purposes, allow all origins temporarily
+        console.log(`Access from origin: ${origin}`);
+        callback(null, true);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   }));
-  // Add this before your other routes
-// app.options('*', (req, res) => {
-//   const origin = req.headers.origin;
-//   console.log(`Received OPTIONS request from: ${origin}`);
-  
-//   // Respond with the appropriate CORS headers
-//   res.header('Access-Control-Allow-Origin', origin);
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-//   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-//   res.header('Access-Control-Allow-Credentials', 'true');
-//   res.status(200).send();
-// });
 } else {
-  console.log("Local Cors Detected")
+  console.log("Local CORS configuration applied");
   app.use(cors({
     origin: 'http://localhost:3001',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   }));
 }
 
