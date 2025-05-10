@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon ./server/app.js",
     "start": "node ./server/app.js",
-    "build": "echo 'No build step required for backend'"
+    "build": "npm install",
+    "install-prod": "npm ci --only=production"
   },
   "repository": {
     "type": "git",
