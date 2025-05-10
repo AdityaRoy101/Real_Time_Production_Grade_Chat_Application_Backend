@@ -51,11 +51,9 @@ const signupUser = async(req, res) => {
 
 // JWT user
 const JwtVerify = async(req, res) => {
-    // If we reach this point, authentication has already succeeded
-    // and the user object has been attached to the request by the middleware
     try {
         // First try to get token from cookies
-        let token = req.cookies.token;
+        let token = req.cookies?.token;
         
         // If no token in cookies, check Authorization header
         if (!token && req.headers.authorization) {
@@ -65,7 +63,18 @@ const JwtVerify = async(req, res) => {
             }
         }
         
+        // If still no token, check query parameters
+        if (!token && req.query.token) {
+            token = req.query.token;
+        }
+        
+        // Check localStorage token in request body (sent by frontend)
+        if (!token && req.body && req.body.token) {
+            token = req.body.token;
+        }
+        
         if (!token) {
+            console.log('No token found in: cookies, headers, query, or body');
             return res.status(401).json({ error: "Authentication required" });
         }
         
@@ -77,7 +86,16 @@ const JwtVerify = async(req, res) => {
             return res.status(401).json({ error: "User not found" });
         }
         
-        // Return user data
+        // Return user data and also set/refresh the cookie if it was missing
+        if (!req.cookies?.token) {
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 3 * 24 * 60 * 60 * 1000
+            });
+        }
+        
         res.status(200).json({
             _id: user._id,
             name: user.name,
